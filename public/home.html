@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Home - MiniMood</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .app-layout {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 70px;
+    }
+
+    .main-content {
+      flex: 1;
+      padding: var(--space-md);
+      max-width: 800px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .streak-banner {
+      background: var(--gradient-header);
+      border-radius: var(--radius-lg);
+      padding: var(--space-md);
+      color: var(--white);
+      margin-bottom: var(--space-md);
+    }
+
+    .streak-top {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-bottom: var(--space-sm);
+    }
+
+    .streak-icon {
+      width: 50px;
+      height: 50px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      object-fit: contain;
+    }
+
+    .streak-icon svg {
+      width: 28px;
+      height: 28px;
+      stroke: white;
+      fill: none;
+    }
+
+    .streak-info h2 {
+      color: var(--white);
+      font-size: 0.9rem;
+      font-weight: 400;
+      margin: 0;
+    }
+
+    .streak-count {
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .streak-progress {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+
+    .progress-bar {
+      height: 6px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--white);
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+
+    .streak-message {
+      font-size: 0.8rem;
+      opacity: 0.9;
+      text-align: right;
+    }
+
+    .home-grid {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    @media (min-width: 768px) {
+      .main-content {
+        padding: var(--space-lg);
+        max-width: 900px;
+      }
+      .home-grid {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: var(--space-lg);
+      }
+      .today-panel {
+        order: 0;
+        position: sticky;
+        top: 80px;
+        align-self: start;
+      }
+      .app-layout {
+        padding-bottom: 0;
+      }
+    }
+
+    .recent-entries {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: var(--space-md);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: var(--space-md);
+    }
+
+    .section-header h2 {
+      color: var(--pink-dark);
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .section-header h2 svg {
+      width: 18px;
+      height: 18px;
+      stroke: var(--pink-dark);
+    }
+
+    .entry-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+
+    .entry-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-md);
+      background: var(--gray-light);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .entry-item:active {
+      background: var(--pink-light);
+      transform: scale(0.98);
+    }
+
+    .entry-mood {
+      width: 36px;
+      height: 36px;
+      flex-shrink: 0;
+    }
+
+    .entry-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .entry-date {
+      font-size: 0.7rem;
+      color: var(--gray-dark);
+    }
+
+    .entry-note {
+      font-size: 0.85rem;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .entry-mood-name {
+      font-size: 0.75rem;
+      color: var(--pink-dark);
+      font-weight: 500;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: var(--space-lg);
+      color: var(--gray-dark);
+    }
+
+    .empty-state svg {
+      width: 50px;
+      height: 50px;
+      stroke: var(--gray);
+      margin-bottom: var(--space-md);
+    }
+
+    .today-panel {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: var(--space-md);
+      box-shadow: var(--shadow-sm);
+      order: -1;
+    }
+
+    .today-panel h2 {
+      color: var(--pink-dark);
+      margin-bottom: var(--space-md);
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .today-panel h2 svg {
+      width: 18px;
+      height: 18px;
+      stroke: var(--pink-dark);
+    }
+
+    .mood-selector-label {
+      font-weight: 500;
+      margin-bottom: var(--space-sm);
+      color: var(--text-dark);
+      font-size: 0.9rem;
+    }
+
+    .mood-search {
+      margin-bottom: var(--space-sm);
+    }
+
+    .mood-search input {
+      padding: var(--space-sm) var(--space-md);
+      font-size: 0.9rem;
+    }
+
+    .mood-grid-container {
+      max-height: 180px;
+      overflow-y: auto;
+      border: 1px solid var(--gray);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-md);
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .mood-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 4px;
+      padding: var(--space-sm);
+    }
+
+    .mood-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      padding: var(--space-xs);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+
+    .mood-item:active {
+      transform: scale(0.95);
+    }
+
+    .mood-item.selected {
+      background: var(--pink-light);
+      border-color: var(--pink);
+    }
+
+    .mood-item img {
+      width: 30px;
+      height: 30px;
+    }
+
+    .mood-item span {
+      font-size: 0.55rem;
+      color: var(--text);
+      text-align: center;
+      line-height: 1.1;
+    }
+
+    .selected-mood-display {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-md);
+      background: var(--pink-light);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-md);
+    }
+
+    .selected-mood-display img {
+      width: 28px;
+      height: 28px;
+    }
+
+    .selected-mood-display span {
+      font-weight: 500;
+      color: var(--pink-dark);
+      font-size: 0.9rem;
+    }
+
+    .note-input {
+      margin-bottom: var(--space-md);
+    }
+
+    .note-input textarea {
+      min-height: 60px;
+      font-size: 0.9rem;
+      padding: var(--space-sm) var(--space-md);
+    }
+
+    .char-count {
+      text-align: right;
+      font-size: 0.7rem;
+      color: var(--gray-dark);
+      margin-top: 2px;
+    }
+
+    .save-btn {
+      width: 100%;
+      padding: var(--space-sm) var(--space-md);
+    }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      margin-top: var(--space-md);
+    }
+
+    .pagination-btn {
+      padding: var(--space-xs) var(--space-md);
+      background: var(--pink-light);
+      border: none;
+      border-radius: var(--radius-md);
+      color: var(--pink-dark);
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .pagination-btn:disabled {
+      opacity: 0.5;
+    }
+
+    .pagination-info {
+      font-size: 0.8rem;
+      color: var(--text);
+    }
+
+    .modal {
+      width: 90%;
+      max-width: 340px;
+      padding: var(--space-md);
+    }
+
+    .entry-detail {
+      text-align: center;
+    }
+
+    .entry-detail-mood {
+      width: 60px;
+      height: 60px;
+      margin: 0 auto var(--space-sm);
+    }
+
+    .entry-detail-name {
+      font-size: 1.1rem;
+      color: var(--pink-dark);
+      margin-bottom: var(--space-xs);
+    }
+
+    .entry-detail-date {
+      color: var(--gray-dark);
+      font-size: 0.8rem;
+      margin-bottom: var(--space-md);
+    }
+
+    .entry-detail-note {
+      background: var(--gray-light);
+      padding: var(--space-md);
+      border-radius: var(--radius-md);
+      font-style: italic;
+      color: var(--text);
+      font-size: 0.9rem;
+      text-align: left;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: var(--space-sm);
+      margin-top: var(--space-md);
+    }
+
+    .modal-actions .btn {
+      flex: 1;
+      padding: var(--space-sm);
+      font-size: 0.9rem;
+    }
+
+    .btn-edit {
+      background: var(--lavender);
+      color: #7C3AED;
+    }
+
+    .btn-danger {
+      background: #FFE4E4;
+      color: #D63031;
+    }
+
+    .bottom-nav {
+      display: flex;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--white);
+      border-top: 1px solid var(--gray);
+      padding: var(--space-xs) 0;
+      z-index: 100;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+    }
+
+    .bottom-nav-link {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      text-decoration: none;
+      color: var(--gray-dark);
+      padding: var(--space-xs);
+      font-size: 0.65rem;
+      transition: var(--transition);
+    }
+
+    .bottom-nav-link.active {
+      color: var(--pink-dark);
+    }
+
+    .bottom-nav-link svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .nav {
+      display: none;
+    }
+
+    @media (min-width: 768px) {
+      .nav {
+        display: flex;
+      }
+      
+      .bottom-nav {
+        display: none;
+      }
+      
+      .app-layout {
+        padding-bottom: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <nav class="nav">
+      <a href="/home" class="nav-brand">
+        <span>🌸</span>
+        <span>MiniMood</span>
+      </a>
+      <div class="nav-links">
+        <a href="/home" class="nav-link active">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          <span>Home</span>
+        </a>
+        <a href="/calendar" class="nav-link">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          <span>Calendar</span>
+        </a>
+        <a href="/stats" class="nav-link">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10"/>
+            <line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6" y1="20" x2="6" y2="14"/>
+          </svg>
+          <span>Stats</span>
+        </a>
+        <button class="btn btn-secondary btn-small" onclick="api.logout()">Logout</button>
+      </div>
+    </nav>
+
+    <main class="main-content">
+      <div class="streak-banner">
+        <img src="/emojis/7_Excited.png" alt="Streak" class="streak-icon">
+        <div class="streak-info">
+          <span class="streak-count" id="streak-count">0</span>
+          <h2>Day Streak</h2>
+        </div>
+        <div class="streak-progress">
+          <div class="progress-bar">
+            <div class="progress-fill" id="streak-progress" style="width: 0%"></div>
+          </div>
+          <span class="streak-message" id="streak-message">Start your streak today!</span>
+        </div>
+      </div>
+
+      <div class="home-grid">
+        <section class="recent-entries">
+          <div class="section-header">
+            <h2>Recent Entries</h2>
+          </div>
+          <div class="entry-list" id="entry-list">
+            <div class="loading">
+              <div class="spinner"></div>
+            </div>
+          </div>
+          <div class="pagination" id="pagination" style="display: none;">
+            <button class="pagination-btn" id="prev-btn" disabled>Previous</button>
+            <span class="pagination-info" id="page-info">Page 1</span>
+            <button class="pagination-btn" id="next-btn">Next</button>
+          </div>
+        </section>
+
+        <aside class="today-panel">
+          <h2>Today's Entry</h2>
+          
+          <p class="mood-selector-label">How are you feeling?</p>
+          
+          <div class="mood-search">
+            <input 
+              type="text" 
+              class="form-input" 
+              id="mood-search" 
+              placeholder="Search moods..."
+            >
+          </div>
+
+          <div id="selected-mood" class="selected-mood-display" style="display: none;">
+            <img src="" alt="" id="selected-mood-img">
+            <span id="selected-mood-name"></span>
+          </div>
+
+          <div class="mood-grid-container">
+            <div class="mood-grid" id="mood-grid">
+            </div>
+          </div>
+
+          <div class="note-input">
+            <textarea 
+              class="form-input" 
+              id="note-input" 
+              placeholder="Write one line about your day..."
+              maxlength="200"
+            ></textarea>
+            <div class="char-count"><span id="char-count">0</span>/200</div>
+          </div>
+
+          <button class="btn btn-primary save-btn" id="save-btn" disabled>
+            Save Entry
+          </button>
+        </aside>
+      </div>
+    </main>
+
+    <div class="modal-overlay" id="entry-modal">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>Entry Details</h3>
+          <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="entry-detail">
+          <img src="" alt="" class="entry-detail-mood" id="modal-mood-img">
+          <div class="entry-detail-name" id="modal-mood-name"></div>
+          <div class="entry-detail-date" id="modal-date"></div>
+          <div class="entry-detail-note" id="modal-note"></div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-danger" id="modal-delete-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <nav class="bottom-nav">
+      <a href="/home" class="bottom-nav-link active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        <span>Home</span>
+      </a>
+      <a href="/calendar" class="bottom-nav-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        <span>Calendar</span>
+      </a>
+      <a href="/stats" class="bottom-nav-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="20" x2="18" y2="10"/>
+          <line x1="12" y1="20" x2="12" y2="4"/>
+          <line x1="6" y1="20" x2="6" y2="14"/>
+        </svg>
+        <span>Stats</span>
+      </a>
+      <a href="#" onclick="api.logout()" class="bottom-nav-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        <span>Logout</span>
+      </a>
+    </nav>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script>
+    if (!api.requireAuth()) {
+    }
+
+    let moods = [];
+    let selectedMoodId = null;
+    let currentPage = 1;
+    let totalPages = 1;
+    let currentEntryDate = null;
+    let editingEntryDate = null;
+
+    const moodGrid = document.getElementById('mood-grid');
+    const moodSearch = document.getElementById('mood-search');
+    const selectedMoodDiv = document.getElementById('selected-mood');
+    const selectedMoodImg = document.getElementById('selected-mood-img');
+    const selectedMoodName = document.getElementById('selected-mood-name');
+    const noteInput = document.getElementById('note-input');
+    const charCount = document.getElementById('char-count');
+    const saveBtn = document.getElementById('save-btn');
+    const entryList = document.getElementById('entry-list');
+    const pagination = document.getElementById('pagination');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const pageInfo = document.getElementById('page-info');
+    const streakCount = document.getElementById('streak-count');
+    const streakProgress = document.getElementById('streak-progress');
+    const streakMessage = document.getElementById('streak-message');
+
+    async function init() {
+      await loadMoods();
+      
+      const editEntryDate = sessionStorage.getItem('editEntryDate');
+      if (editEntryDate) {
+        sessionStorage.removeItem('editEntryDate');
+        editingEntryDate = editEntryDate;
+        await loadEntryForEdit(editEntryDate);
+      } else {
+        await loadTodayEntry();
+      }
+      
+      await loadEntries();
+      await loadStats();
+    }
+    
+    async function loadEntryForEdit(dateStr) {
+      try {
+        const data = await api.getEntryByDate(dateStr);
+        if (!data.entry) {
+          api.showToast('Entry not found', 'error');
+          return;
+        }
+
+        const entry = data.entry;
+        
+        editingEntryDate = dateStr;
+        
+        selectedMoodId = entry.mood_id;
+        const mood = moods.find(m => m.id === entry.mood_id);
+        if (mood) {
+          selectedMoodImg.src = `/emojis/${mood.file}`;
+          selectedMoodName.textContent = mood.name;
+          selectedMoodDiv.style.display = 'flex';
+          renderMoods(moods);
+        }
+        
+        noteInput.value = entry.note || '';
+        charCount.textContent = noteInput.value.length;
+        
+        updateSaveButton();
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        api.showToast('Edit your entry and save', 'success');
+      } catch (error) {
+        api.showToast('Failed to load entry for editing', 'error');
+      }
+    }
+
+    async function loadMoods() {
+      try {
+        const data = await api.getMoods();
+        moods = data.moods;
+        renderMoods(moods);
+      } catch (error) {
+        console.error('Failed to load moods:', error);
+      }
+    }
+
+    function renderMoods(moodsToRender) {
+      moodGrid.innerHTML = moodsToRender.map(mood => `
+        <div class="mood-item ${selectedMoodId === mood.id ? 'selected' : ''}" 
+             data-id="${mood.id}" 
+             onclick="selectMood(${mood.id})">
+          <img src="/emojis/${mood.file}" alt="${mood.name}">
+          <span>${mood.name}</span>
+        </div>
+      `).join('');
+    }
+
+    function selectMood(id) {
+      selectedMoodId = id;
+      const mood = moods.find(m => m.id === id);
+      
+      if (mood) {
+        selectedMoodImg.src = `/emojis/${mood.file}`;
+        selectedMoodName.textContent = mood.name;
+        selectedMoodDiv.style.display = 'flex';
+      }
+
+      document.querySelectorAll('.mood-item').forEach(item => {
+        item.classList.toggle('selected', parseInt(item.dataset.id) === id);
+      });
+
+      updateSaveButton();
+    }
+
+    moodSearch.addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase();
+      const filtered = moods.filter(m => m.name.toLowerCase().includes(query));
+      renderMoods(filtered);
+    });
+
+    noteInput.addEventListener('input', () => {
+      charCount.textContent = noteInput.value.length;
+      updateSaveButton();
+    });
+
+    function updateSaveButton() {
+      saveBtn.disabled = !selectedMoodId;
+    }
+
+    saveBtn.addEventListener('click', async () => {
+      if (!selectedMoodId) return;
+
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving...';
+
+      try {
+        await api.saveEntry(selectedMoodId, noteInput.value.trim(), editingEntryDate);
+        api.showToast('Entry saved!', 'success');
+        
+        editingEntryDate = null;
+        
+        await loadTodayEntry();
+        await loadEntries();
+        await loadStats();
+      } catch (error) {
+        api.showToast(error.message, 'error');
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save Entry';
+      }
+    });
+
+    async function loadTodayEntry() {
+      if (editingEntryDate) {
+        return;
+      }
+      
+      try {
+        const data = await api.getTodayEntry();
+        
+        if (data.entry) {
+          selectedMoodId = data.entry.mood_id;
+          const mood = data.entry.mood;
+          
+          selectedMoodImg.src = `/emojis/${mood.file}`;
+          selectedMoodName.textContent = mood.name;
+          selectedMoodDiv.style.display = 'flex';
+          
+          noteInput.value = data.entry.note || '';
+          charCount.textContent = noteInput.value.length;
+          
+          renderMoods(moods);
+          updateSaveButton();
+        }
+      } catch (error) {
+        console.error('Failed to load today entry:', error);
+      }
+    }
+
+    async function loadEntries() {
+      try {
+        const data = await api.getEntries(currentPage, 10);
+        totalPages = data.pagination.totalPages;
+
+        if (data.entries.length === 0) {
+          entryList.innerHTML = `
+            <div class="empty-state">
+              <img src="/emojis/40_Neutral.png" alt="No entries">
+              <p>No entries yet. Start logging your mood!</p>
+            </div>
+          `;
+          pagination.style.display = 'none';
+        } else {
+          entryList.innerHTML = data.entries.map(entry => {
+            const hasMood = entry.mood;
+            return `
+              <div class="entry-item" onclick="showEntryDetail('${entry.entry_date}')">
+                ${hasMood ? `<img src="/emojis/${entry.mood.file}" alt="${entry.mood.name}" class="entry-mood">` : '<div class="entry-mood" style="width:36px;height:36px;background:#eee;border-radius:50%;"></div>'}
+                <div class="entry-content">
+                  <div class="entry-date">${api.formatDate(entry.entry_date)}</div>
+                  <div class="entry-mood-name">${hasMood ? entry.mood.name : 'Unknown'}</div>
+                  ${entry.note ? `<div class="entry-note">${entry.note}</div>` : ''}
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          pagination.style.display = 'flex';
+          pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+          prevBtn.disabled = currentPage === 1;
+          nextBtn.disabled = currentPage >= totalPages;
+        }
+      } catch (error) {
+        console.error('Failed to load entries:', error);
+        entryList.innerHTML = '<p class="text-center text-muted">Failed to load entries</p>';
+      }
+    }
+
+    prevBtn.addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage--;
+        loadEntries();
+      }
+    });
+
+    nextBtn.addEventListener('click', () => {
+      if (currentPage < totalPages) {
+        currentPage++;
+        loadEntries();
+      }
+    });
+
+    async function loadStats() {
+      try {
+        const data = await api.getStats();
+        const stats = data.stats;
+
+        streakCount.textContent = stats.currentStreak;
+        
+        const progress = Math.min((stats.currentStreak / 7) * 100, 100);
+        streakProgress.style.width = `${progress}%`;
+
+        if (stats.loggedToday) {
+          streakMessage.textContent = `Great job! Keep it going!`;
+        } else if (stats.currentStreak > 0) {
+          streakMessage.textContent = `Log today to keep your streak!`;
+        } else {
+          streakMessage.textContent = `Start your streak today!`;
+        }
+      } catch (error) {
+        console.error('Failed to load stats:', error);
+      }
+    }
+
+    async function showEntryDetail(date) {
+      try {
+        const data = await api.getEntryByDate(date);
+        if (!data.entry) return;
+
+        const entry = data.entry;
+        currentEntryDate = date;
+        const hasMood = entry.mood;
+
+        if (hasMood) {
+          document.getElementById('modal-mood-img').src = `/emojis/${entry.mood.file}`;
+          document.getElementById('modal-mood-name').textContent = entry.mood.name;
+        } else {
+          document.getElementById('modal-mood-img').src = '/emojis/40_Neutral.png';
+          document.getElementById('modal-mood-name').textContent = 'Unknown';
+        }
+        document.getElementById('modal-date').textContent = api.formatDate(entry.entry_date);
+        document.getElementById('modal-note').textContent = entry.note || 'No note';
+        
+        document.getElementById('entry-modal').classList.add('show');
+      } catch (error) {
+        api.showToast('Failed to load entry', 'error');
+      }
+    }
+
+    function closeModal() {
+      document.getElementById('entry-modal').classList.remove('show');
+      currentEntryDate = null;
+    }
+
+    document.getElementById('modal-delete-btn').addEventListener('click', async () => {
+      if (!currentEntryDate) return;
+      
+      if (confirm('Are you sure you want to delete this entry?')) {
+        try {
+          await api.deleteEntry(currentEntryDate);
+          api.showToast('Entry deleted', 'success');
+          closeModal();
+          
+          if (currentEntryDate === api.getTodayDate()) {
+            selectedMoodId = null;
+            selectedMoodDiv.style.display = 'none';
+            noteInput.value = '';
+            charCount.textContent = '0';
+            renderMoods(moods);
+            updateSaveButton();
+          }
+          
+          await loadEntries();
+          await loadStats();
+        } catch (error) {
+          api.showToast(error.message, 'error');
+        }
+      }
+    });
+
+    document.getElementById('entry-modal').addEventListener('click', (e) => {
+      if (e.target.classList.contains('modal-overlay')) {
+        closeModal();
+      }
+    });
+
+    init();
+  </script>
+</body>
+</html>
