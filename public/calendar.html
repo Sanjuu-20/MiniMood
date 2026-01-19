@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Calendar - MiniMood</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    
+    .app-layout {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 70px;
+    }
+
+    .main-content {
+      flex: 1;
+      padding: var(--space-md);
+      max-width: 1000px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .view-tabs {
+      display: flex;
+      gap: var(--space-xs);
+      margin-bottom: var(--space-md);
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .view-tab {
+      padding: var(--space-xs) var(--space-md);
+      background: var(--white);
+      border: 2px solid var(--gray);
+      border-radius: var(--radius-xl);
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 500;
+      color: var(--text);
+      font-size: 0.85rem;
+      min-height: 40px;
+    }
+
+    .view-tab:hover {
+      border-color: var(--pink);
+    }
+
+    .view-tab.active {
+      background: var(--pink-light);
+      border-color: var(--pink);
+      color: var(--pink-dark);
+    }
+
+    .calendar-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-md);
+    }
+
+    .calendar-nav h2 {
+      min-width: 140px;
+      text-align: center;
+      color: var(--pink-dark);
+      font-size: 1rem;
+    }
+
+    .nav-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: var(--pink-light);
+      color: var(--pink-dark);
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .nav-btn:hover {
+      background: var(--pink);
+      color: var(--white);
+    }
+
+    .calendar-container {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: var(--space-sm);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .week-view {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .week-day {
+      text-align: center;
+      padding: var(--space-xs);
+      background: var(--gray-light);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: var(--transition);
+      min-height: 70px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    .week-day:hover {
+      background: var(--pink-light);
+    }
+
+    .week-day.today {
+      border: 2px solid var(--pink);
+    }
+
+    .week-day.has-entry {
+      background: var(--lavender);
+    }
+
+    .week-day-name {
+      font-size: 0.6rem;
+      color: var(--gray-dark);
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .week-day-date {
+      font-weight: 600;
+      font-size: 0.8rem;
+      margin-bottom: 4px;
+      color: var(--text-dark);
+    }
+
+    .week-day-mood {
+      width: 24px;
+      height: 24px;
+      position: absolute;
+      bottom: 4px;
+      right: 4px;
+    }
+
+    .month-header {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px;
+      margin-bottom: 4px;
+    }
+
+    .month-header-day {
+      text-align: center;
+      font-size: 0.6rem;
+      color: var(--gray-dark);
+      text-transform: uppercase;
+      padding: var(--space-xs);
+    }
+
+    .month-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px;
+    }
+
+    .month-day {
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      background: var(--gray-light);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: var(--transition);
+      padding: 2px;
+      min-height: 38px;
+      position: relative;
+    }
+
+    .month-day:hover:not(.empty) {
+      background: var(--pink-light);
+    }
+
+    .month-day.today {
+      border: 2px solid var(--pink);
+    }
+
+    .month-day.has-entry {
+      background: var(--lavender);
+    }
+
+    .month-day.empty {
+      background: transparent;
+      cursor: default;
+    }
+
+    .month-day.other-month {
+      opacity: 0.4;
+    }
+
+    .month-day-num {
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .month-day-mood {
+      width: 16px;
+      height: 16px;
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+    }
+
+    .year-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-sm);
+    }
+
+    .year-month {
+      background: var(--gray-light);
+      border-radius: var(--radius-md);
+      padding: var(--space-sm);
+    }
+
+    .year-month-name {
+      font-weight: 600;
+      font-size: 0.75rem;
+      color: var(--pink-dark);
+      margin-bottom: var(--space-xs);
+      text-align: center;
+    }
+
+    .year-month-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 1px;
+    }
+
+    .year-day {
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: var(--transition);
+      min-height: 18px;
+      position: relative;
+      font-size: 0.5rem;
+      color: var(--text);
+      padding: 1px;
+    }
+
+    .year-day:hover:not(.empty) {
+      transform: scale(1.3);
+      z-index: 1;
+    }
+
+    .year-day.empty {
+      cursor: default;
+    }
+
+    .year-day.has-entry {
+      background: var(--lavender);
+    }
+
+    .year-day.today {
+      border: 1px solid var(--pink);
+    }
+
+    .year-day-mood {
+      width: 10px;
+      height: 10px;
+      position: absolute;
+      bottom: 1px;
+      right: 1px;
+    }
+
+    .year-day-num {
+      font-size: 0.45rem;
+      line-height: 1;
+    }
+
+    .year-day-dot {
+      width: 4px;
+      height: 4px;
+      background: var(--gray);
+      border-radius: 50%;
+    }
+
+    .year-day.has-entry .year-day-dot {
+      display: none;
+    }
+
+    .modal {
+      width: 92%;
+      max-width: 320px;
+      padding: var(--space-md);
+    }
+    
+    .entry-detail {
+      text-align: center;
+    }
+
+    .entry-detail-mood {
+      width: 60px;
+      height: 60px;
+      margin: 0 auto var(--space-sm);
+    }
+
+    .entry-detail-name {
+      font-size: 1rem;
+      color: var(--pink-dark);
+      margin-bottom: var(--space-xs);
+    }
+
+    .entry-detail-date {
+      color: var(--gray-dark);
+      font-size: 0.8rem;
+      margin-bottom: var(--space-sm);
+    }
+
+    .entry-detail-note {
+      background: var(--gray-light);
+      padding: var(--space-sm);
+      border-radius: var(--radius-md);
+      font-style: italic;
+      color: var(--text);
+      font-size: 0.85rem;
+      text-align: left;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: var(--space-xs);
+      margin-top: var(--space-md);
+    }
+
+    .modal-actions .btn {
+      flex: 1;
+      padding: var(--space-sm);
+      font-size: 0.85rem;
+    }
+
+    .btn-edit {
+      background: var(--lavender);
+      color: #7C3AED;
+    }
+
+    .btn-danger {
+      background: #FFE4E4;
+      color: #D63031;
+    }
+
+    .no-entry-message {
+      text-align: center;
+      padding: var(--space-md);
+      color: var(--gray-dark);
+    }
+    
+    .no-entry-message p {
+      font-size: 0.9rem;
+    }
+
+    .add-entry-btn {
+      margin-top: var(--space-sm);
+      display: inline-block;
+    }
+
+    @media (min-width: 480px) {
+      .year-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      
+      .week-day {
+        min-height: 80px;
+        padding: var(--space-sm);
+      }
+      
+      .week-day-mood {
+        width: 30px;
+        height: 30px;
+      }
+      
+      .month-day-mood {
+        width: 20px;
+        height: 20px;
+      }
+      
+      .year-day-mood {
+        width: 12px;
+        height: 12px;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .main-content {
+        padding: var(--space-lg);
+      }
+      
+      .calendar-container {
+        padding: var(--space-md);
+      }
+      
+      .year-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--space-md);
+      }
+      
+      .week-view {
+        gap: var(--space-sm);
+      }
+      
+      .week-day {
+        min-height: 100px;
+      }
+      
+      .week-day-name {
+        font-size: 0.75rem;
+      }
+      
+      .week-day-date {
+        font-size: 1rem;
+      }
+      
+      .week-day-mood {
+        width: 36px;
+        height: 36px;
+      }
+      
+      .month-grid {
+        gap: 4px;
+      }
+      
+      .month-day {
+        min-height: 50px;
+      }
+      
+      .month-day-num {
+        font-size: 0.85rem;
+      }
+      
+      .month-day-mood {
+        width: 22px;
+        height: 22px;
+      }
+      
+      .calendar-nav h2 {
+        font-size: 1.2rem;
+        min-width: 200px;
+      }
+    }
+
+    .bottom-nav {
+      display: flex;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--white);
+      border-top: 1px solid var(--gray);
+      padding: var(--space-xs) 0;
+      z-index: 100;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+    }
+
+    .bottom-nav-link {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      text-decoration: none;
+      color: var(--gray-dark);
+      padding: var(--space-xs);
+      font-size: 0.65rem;
+      transition: var(--transition);
+    }
+
+    .bottom-nav-link.active {
+      color: var(--pink-dark);
+    }
+
+    .bottom-nav-link svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .nav {
+      display: none;
+    }
+
+    @media (min-width: 768px) {
+      .nav {
+        display: flex;
+      }
+      
+      .bottom-nav {
+        display: none;
+      }
+      
+      .app-layout {
+        padding-bottom: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <nav class="nav">
+      <a href="/home" class="nav-brand">
+        <span>🌸</span>
+        <span>MiniMood</span>
+      </a>
+      <div class="nav-links">
+        <a href="/home" class="nav-link">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          <span>Home</span>
+        </a>
+        <a href="/calendar" class="nav-link active">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          <span>Calendar</span>
+        </a>
+        <a href="/stats" class="nav-link">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10"/>
+            <line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6" y1="20" x2="6" y2="14"/>
+          </svg>
+          <span>Stats</span>
+        </a>
+        <button class="btn btn-secondary btn-small" onclick="api.logout()">Logout</button>
+      </div>
+    </nav>
+
+    <main class="main-content">
+      <div class="view-tabs">
+        <button class="view-tab active" data-view="week">Week</button>
+        <button class="view-tab" data-view="month">Month</button>
+        <button class="view-tab" data-view="year">Year</button>
+      </div>
+
+      <div class="calendar-nav">
+        <button class="nav-btn" id="prev-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </button>
+        <h2 id="calendar-title">January 2026</h2>
+        <button class="nav-btn" id="next-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="calendar-container">
+        <div id="calendar-content">
+          <div class="loading">
+            <div class="spinner"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <div class="modal-overlay" id="entry-modal">
+      <div class="modal">
+        <div class="modal-header">
+          <h3 id="modal-title">Entry Details</h3>
+          <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div id="modal-content">
+        </div>
+      </div>
+    </div>
+
+    <nav class="bottom-nav">
+      <a href="/home" class="bottom-nav-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        <span>Home</span>
+      </a>
+      <a href="/calendar" class="bottom-nav-link active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        <span>Calendar</span>
+      </a>
+      <a href="/stats" class="bottom-nav-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="20" x2="18" y2="10"/>
+          <line x1="12" y1="20" x2="12" y2="4"/>
+          <line x1="6" y1="20" x2="6" y2="14"/>
+        </svg>
+        <span>Stats</span>
+      </a>
+      <a href="#" onclick="api.logout()" class="bottom-nav-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        <span>Logout</span>
+      </a>
+    </nav>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script>
+    if (!api.requireAuth()) {
+     
+    }
+
+    let currentView = 'week';
+    let currentDate = new Date();
+    let entries = {};
+
+    const viewTabs = document.querySelectorAll('.view-tab');
+    const calendarTitle = document.getElementById('calendar-title');
+    const calendarContent = document.getElementById('calendar-content');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const modal = document.getElementById('entry-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalContent = document.getElementById('modal-content');
+
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                        'July', 'August', 'September', 'October', 'November', 'December'];
+
+    async function init() {
+      await loadEntriesForView();
+      setupEventListeners();
+    }
+
+    function setupEventListeners() {
+      viewTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          viewTabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          currentView = tab.dataset.view;
+          loadEntriesForView();
+        });
+      });
+
+      prevBtn.addEventListener('click', () => navigate(-1));
+      nextBtn.addEventListener('click', () => navigate(1));
+
+      modal.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal-overlay')) {
+          closeModal();
+        }
+      });
+    }
+
+    function navigate(direction) {
+      if (currentView === 'week') {
+        currentDate.setDate(currentDate.getDate() + (direction * 7));
+      } else if (currentView === 'month') {
+        currentDate.setMonth(currentDate.getMonth() + direction);
+      } else {
+        currentDate.setFullYear(currentDate.getFullYear() + direction);
+      }
+      loadEntriesForView();
+    }
+
+    function getDateRange() {
+      const start = new Date(currentDate);
+      const end = new Date(currentDate);
+
+      if (currentView === 'week') {
+        const day = start.getDay();
+        start.setDate(start.getDate() - day);
+        end.setTime(start.getTime());
+        end.setDate(end.getDate() + 6);
+      } else if (currentView === 'month') {
+        start.setDate(1);
+        end.setMonth(end.getMonth() + 1);
+        end.setDate(0);
+      } else {
+        start.setMonth(0, 1);
+        end.setMonth(11, 31);
+      }
+
+      return {
+        start: formatDateISO(start),
+        end: formatDateISO(end)
+      };
+    }
+
+    function formatDateISO(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function normalizeDate(dateStr) {
+      if (!dateStr) return null;
+      return String(dateStr).split('T')[0];
+    }
+
+    async function loadEntriesForView() {
+      const range = getDateRange();
+      
+      try {
+        const data = await api.getEntriesRange(range.start, range.end);
+        
+        entries = {};
+        data.entries.forEach(entry => {
+          const dateKey = normalizeDate(entry.entry_date);
+          entries[dateKey] = entry;
+        });
+
+        updateTitle();
+        render();
+      } catch (error) {
+        console.error('Failed to load entries:', error);
+        api.showToast('Failed to load calendar', 'error');
+      }
+    }
+
+    function updateTitle() {
+      if (currentView === 'week') {
+        const range = getDateRange();
+        const start = new Date(range.start);
+        const end = new Date(range.end);
+        calendarTitle.textContent = `${monthNames[start.getMonth()]} ${start.getDate()} - ${monthNames[end.getMonth()]} ${end.getDate()}, ${end.getFullYear()}`;
+      } else if (currentView === 'month') {
+        calendarTitle.textContent = `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+      } else {
+        calendarTitle.textContent = `${currentDate.getFullYear()}`;
+      }
+    }
+
+    function render() {
+      if (currentView === 'week') {
+        renderWeek();
+      } else if (currentView === 'month') {
+        renderMonth();
+      } else {
+        renderYear();
+      }
+    }
+
+    function renderWeek() {
+      const range = getDateRange();
+      const startDate = new Date(range.start);
+      const today = formatDateISO(new Date());
+
+      let html = '<div class="week-view">';
+
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(startDate);
+        date.setDate(startDate.getDate() + i);
+        const dateStr = formatDateISO(date);
+        const entry = entries[dateStr];
+
+        const isToday = dateStr === today;
+        const hasEntry = !!entry;
+        const hasMood = entry && entry.mood;
+
+        html += `
+          <div class="week-day ${isToday ? 'today' : ''} ${hasEntry ? 'has-entry' : ''}" 
+               onclick="showDayDetail('${dateStr}')">
+            <div class="week-day-name">${dayNames[date.getDay()]}</div>
+            <div class="week-day-date">${date.getDate()}</div>
+            ${hasMood ? `<img src="/emojis/${entry.mood.file}" alt="${entry.mood.name}" class="week-day-mood">` : ''}
+          </div>
+        `;
+      }
+
+      html += '</div>';
+      calendarContent.innerHTML = html;
+    }
+
+    function renderMonth() {
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const startDay = firstDay.getDay();
+      const totalDays = lastDay.getDate();
+      const today = formatDateISO(new Date());
+
+      let html = `
+        <div class="month-header">
+          ${dayNames.map(d => `<div class="month-header-day">${d}</div>`).join('')}
+        </div>
+        <div class="month-grid">
+      `;
+
+      for (let i = 0; i < startDay; i++) {
+        html += '<div class="month-day empty"></div>';
+      }
+
+      for (let day = 1; day <= totalDays; day++) {
+        const date = new Date(year, month, day);
+        const dateStr = formatDateISO(date);
+        const entry = entries[dateStr];
+        const isToday = dateStr === today;
+        const hasEntry = !!entry;
+        const hasMood = entry && entry.mood;
+
+        html += `
+          <div class="month-day ${isToday ? 'today' : ''} ${hasEntry ? 'has-entry' : ''}" 
+               onclick="showDayDetail('${dateStr}')">
+            <div class="month-day-num">${day}</div>
+            ${hasMood ? `<img src="/emojis/${entry.mood.file}" alt="${entry.mood.name}" class="month-day-mood">` : ''}
+          </div>
+        `;
+      }
+
+      html += '</div>';
+      calendarContent.innerHTML = html;
+    }
+
+    function renderYear() {
+      const year = currentDate.getFullYear();
+      const today = formatDateISO(new Date());
+
+      let html = '<div class="year-grid">';
+
+      for (let month = 0; month < 12; month++) {
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const startDay = firstDay.getDay();
+        const totalDays = lastDay.getDate();
+
+        html += `
+          <div class="year-month">
+            <div class="year-month-name">${monthNames[month]}</div>
+            <div class="year-month-grid">
+        `;
+
+        for (let i = 0; i < startDay; i++) {
+          html += '<div class="year-day empty"></div>';
+        }
+
+        for (let day = 1; day <= totalDays; day++) {
+          const date = new Date(year, month, day);
+          const dateStr = formatDateISO(date);
+          const entry = entries[dateStr];
+          const isToday = dateStr === today;
+          const hasEntry = !!entry;
+          const hasMood = entry && entry.mood;
+
+          html += `
+            <div class="year-day ${isToday ? 'today' : ''} ${hasEntry ? 'has-entry' : ''}" 
+                 onclick="showDayDetail('${dateStr}')" 
+                 title="${monthNames[month]} ${day}">
+              <span class="year-day-num">${day}</span>
+              ${hasMood ? `<img src="/emojis/${entry.mood.file}" alt="${entry.mood.name}" class="year-day-mood">` : ''}
+            </div>
+          `;
+        }
+
+        html += '</div></div>';
+      }
+
+      html += '</div>';
+      calendarContent.innerHTML = html;
+    }
+
+    async function showDayDetail(dateStr) {
+      const entry = entries[dateStr];
+      const dateObj = new Date(dateStr + 'T00:00:00');
+      const formattedDate = dateObj.toLocaleDateString('en-US', {
+        weekday: 'short',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+
+      modalTitle.textContent = formattedDate;
+
+      if (entry) {
+        const hasMood = entry.mood;
+        modalContent.innerHTML = `
+          <div class="entry-detail">
+            ${hasMood ? `<img src="/emojis/${entry.mood.file}" alt="${entry.mood.name}" class="entry-detail-mood">` : ''}
+            <div class="entry-detail-name">${hasMood ? entry.mood.name : 'Unknown mood'}</div>
+            <div class="entry-detail-date">${formatDate(dateStr)}</div>
+            <div class="entry-detail-note">${entry.note || 'No note'}</div>
+          </div>
+          <div class="modal-actions">
+            <button class="btn btn-danger" onclick="deleteEntry('${dateStr}')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+              Delete
+            </button>
+          </div>
+        `;
+      } else {
+        const today = formatDateISO(new Date());
+        const isPast = dateStr < today;
+        const isFuture = dateStr > today;
+
+        modalContent.innerHTML = `
+          <div class="no-entry-message">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="1.5" style="margin-bottom: 12px; opacity: 0.5;">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="8" y1="15" x2="16" y2="15"/>
+              <line x1="9" y1="9" x2="9.01" y2="9"/>
+              <line x1="15" y1="9" x2="15.01" y2="9"/>
+            </svg>
+            <p>${isFuture ? 'Future date - come back later!' : 'No entry for this day'}</p>
+            ${!isFuture ? `<a href="/home" class="btn btn-primary add-entry-btn" style="font-size: 0.85rem; padding: 8px 16px;">Add Entry</a>` : ''}
+          </div>
+          <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeModal()" style="width: 100%;">Close</button>
+          </div>
+        `;
+      }
+
+      modal.classList.add('show');
+    }
+
+    function editEntry(dateStr) {
+      sessionStorage.setItem('editEntryDate', dateStr);
+      window.location.href = '/home';
+    }
+
+    async function deleteEntry(dateStr) {
+      if (confirm('Are you sure you want to delete this entry?')) {
+        try {
+          await api.deleteEntry(dateStr);
+          api.showToast('Entry deleted', 'success');
+          closeModal();
+          delete entries[dateStr];
+          render();
+        } catch (error) {
+          api.showToast(error.message, 'error');
+        }
+      }
+    }
+
+    function closeModal() {
+      modal.classList.remove('show');
+    }
+
+    init();
+  </script>
+</body>
+</html>

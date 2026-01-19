@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Sign Up - MiniMood</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    
+    .auth-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .auth-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-md);
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 360px;
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      padding: var(--space-lg);
+    }
+
+    .auth-header {
+      text-align: center;
+      margin-bottom: var(--space-lg);
+    }
+
+    .auth-icon {
+      font-size: 2.5rem;
+      margin-bottom: var(--space-xs);
+    }
+
+    .auth-header h1 {
+      color: var(--pink-dark);
+      margin-bottom: var(--space-xs);
+      font-size: 1.5rem;
+    }
+
+    .auth-header p {
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+
+    .form-group label {
+      font-size: 0.85rem;
+    }
+
+    .form-group input {
+      font-size: 16px;
+      padding: var(--space-sm);
+    }
+
+    .auth-form .btn {
+      width: 100%;
+      margin-top: var(--space-md);
+      padding: var(--space-sm);
+      font-size: 1rem;
+    }
+
+    .auth-footer {
+      text-align: center;
+      margin-top: var(--space-md);
+      padding-top: var(--space-md);
+      border-top: 1px solid var(--gray);
+      font-size: 0.9rem;
+    }
+
+    .auth-footer a {
+      color: var(--pink-dark);
+      font-weight: 500;
+    }
+
+    .error-message {
+      background: #FFE4E4;
+      color: #D63031;
+      padding: var(--space-sm);
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      margin-bottom: var(--space-md);
+      display: none;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      color: var(--text);
+      font-size: 0.85rem;
+      margin-bottom: var(--space-md);
+    }
+
+    .back-link:hover {
+      color: var(--pink-dark);
+    }
+
+    .password-hint {
+      font-size: 0.7rem;
+      color: var(--gray-dark);
+      margin-top: var(--space-xs);
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-page">
+    <div class="container">
+      <a href="/" class="back-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        Back to home
+      </a>
+    </div>
+
+    <div class="auth-container">
+      <div class="auth-card">
+        <div class="auth-header">
+          <div class="auth-icon">🌸</div>
+          <h1>Join MiniMood</h1>
+          <p>Start your daily mood journey</p>
+        </div>
+
+        <div id="error-message" class="error-message"></div>
+
+        <form id="register-form" class="auth-form">
+          <div class="form-group">
+            <label class="form-label" for="username">Username</label>
+            <input 
+              type="text" 
+              id="username" 
+              name="username" 
+              class="form-input" 
+              placeholder="Choose a username"
+              required
+              minlength="3"
+              maxlength="50"
+              pattern="[a-zA-Z0-9_]+"
+            >
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="email">Email</label>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              class="form-input" 
+              placeholder="your@email.com"
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <input 
+              type="password" 
+              id="password" 
+              name="password" 
+              class="form-input" 
+              placeholder="Create a password"
+              required
+              minlength="6"
+            >
+            <p class="password-hint">At least 6 characters</p>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="confirm-password">Confirm Password</label>
+            <input 
+              type="password" 
+              id="confirm-password" 
+              name="confirm-password" 
+              class="form-input" 
+              placeholder="Confirm your password"
+              required
+            >
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="submit-btn">
+            Create Account
+          </button>
+        </form>
+
+        <div class="auth-footer">
+          <p>Already have an account? <a href="/login">Sign in</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script>
+    api.redirectIfLoggedIn();
+
+    const form = document.getElementById('register-form');
+    const errorDiv = document.getElementById('error-message');
+    const submitBtn = document.getElementById('submit-btn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      errorDiv.classList.remove('show');
+      
+      const username = document.getElementById('username').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirm-password').value;
+
+      if (password !== confirmPassword) {
+        errorDiv.textContent = 'Passwords do not match';
+        errorDiv.classList.add('show');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Creating account...';
+
+      try {
+        await api.register(username, email, password);
+        window.location.href = '/home';
+      } catch (error) {
+        errorDiv.textContent = error.message;
+        errorDiv.classList.add('show');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Create Account';
+      }
+    });
+  </script>
+</body>
+</html>

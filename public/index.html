@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>MiniMood - One line, one mood, every day</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    
+    .landing {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .landing-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-sm) var(--space-md);
+      background: transparent;
+    }
+
+    .hero {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: var(--space-lg) var(--space-md);
+      background: var(--gradient-primary);
+      border-radius: 0 0 40% 40% / 0 0 20% 20%;
+      margin-bottom: var(--space-xl);
+    }
+
+    .hero-icon {
+      font-size: 3.5rem;
+      margin-bottom: var(--space-sm);
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .hero h1 {
+      font-size: 2rem;
+      color: var(--white);
+      margin-bottom: var(--space-xs);
+      text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .hero-tagline {
+      font-size: 1rem;
+      color: var(--white);
+      opacity: 0.9;
+      margin-bottom: var(--space-lg);
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: var(--space-sm);
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .hero-buttons .btn {
+      padding: var(--space-sm) var(--space-lg);
+      font-size: 0.9rem;
+    }
+
+    .hero .btn-primary {
+      background: var(--white);
+      color: var(--pink-dark);
+    }
+
+    .hero .btn-secondary {
+      background: transparent;
+      color: var(--white);
+      border-color: var(--white);
+    }
+
+    .hero .btn-secondary:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    .features {
+      padding: var(--space-xl) var(--space-md);
+      text-align: center;
+    }
+
+    .features h2 {
+      margin-bottom: var(--space-lg);
+      color: var(--pink-dark);
+      font-size: 1.5rem;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--space-md);
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .feature-card {
+      background: var(--white);
+      padding: var(--space-lg);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+    }
+
+    .feature-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .feature-icon {
+      width: 50px;
+      height: 50px;
+      margin: 0 auto var(--space-sm);
+      background: var(--pink-light);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .feature-icon img {
+      width: 36px;
+      height: 36px;
+    }
+
+    .feature-card h3 {
+      margin-bottom: var(--space-sm);
+      color: var(--pink-dark);
+    }
+
+    .feature-card p {
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+
+    .mood-preview {
+      padding: var(--space-xxl) var(--space-lg);
+      background: var(--lavender);
+      text-align: center;
+    }
+
+    .mood-preview h2 {
+      margin-bottom: var(--space-md);
+      color: var(--pink-dark);
+    }
+
+    .mood-preview p {
+      margin-bottom: var(--space-xl);
+      color: var(--text);
+    }
+
+    .mood-showcase {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: var(--space-md);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .mood-showcase-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-xs);
+      padding: var(--space-md);
+      background: var(--white);
+      border-radius: var(--radius-md);
+      transition: var(--transition);
+    }
+
+    .mood-showcase-item:hover {
+      transform: scale(1.1);
+    }
+
+    .mood-showcase-item img {
+      width: 48px;
+      height: 48px;
+    }
+
+    .mood-showcase-item span {
+      font-size: 0.8rem;
+      color: var(--text);
+    }
+
+    .cta {
+      padding: var(--space-xl) var(--space-md);
+      text-align: center;
+    }
+
+    .cta h2 {
+      margin-bottom: var(--space-sm);
+      color: var(--pink-dark);
+      font-size: 1.3rem;
+    }
+
+    .cta p {
+      margin-bottom: var(--space-md);
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+
+    .footer {
+      padding: var(--space-md);
+      text-align: center;
+      background: var(--white);
+      color: var(--text);
+      font-size: 0.8rem;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-xs);
+      margin-bottom: var(--space-xs);
+      color: var(--pink-dark);
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .mood-preview {
+      padding: var(--space-xl) var(--space-md);
+      background: var(--lavender);
+      text-align: center;
+    }
+
+    .mood-preview h2 {
+      margin-bottom: var(--space-sm);
+      color: var(--pink-dark);
+      font-size: 1.3rem;
+    }
+
+    .mood-preview p {
+      margin-bottom: var(--space-md);
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+
+    .mood-showcase {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .mood-showcase-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: var(--space-sm);
+      background: var(--white);
+      border-radius: var(--radius-md);
+      transition: var(--transition);
+    }
+
+    .mood-showcase-item:hover {
+      transform: scale(1.05);
+    }
+
+    .mood-showcase-item img {
+      width: 36px;
+      height: 36px;
+    }
+
+    @media (min-width: 480px) {
+      .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .mood-showcase-item img {
+        width: 44px;
+        height: 44px;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .landing-nav {
+        padding: var(--space-md) var(--space-lg);
+      }
+      
+      .hero {
+        padding: var(--space-xl);
+        border-radius: 0 0 50% 50% / 0 0 30% 30%;
+      }
+      
+      .hero-icon {
+        font-size: 5rem;
+      }
+      
+      .hero h1 {
+        font-size: 3rem;
+      }
+      
+      .hero-tagline {
+        font-size: 1.25rem;
+      }
+      
+      .features {
+        padding: var(--space-xxl) var(--space-lg);
+      }
+      
+      .features h2 {
+        font-size: 2rem;
+      }
+      
+      .features-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      
+      .feature-card {
+        padding: var(--space-xl);
+      }
+      
+      .mood-preview {
+        padding: var(--space-xxl) var(--space-lg);
+      }
+      
+      .cta {
+        padding: var(--space-xxl) var(--space-lg);
+      }
+      
+      .cta h2 {
+        font-size: 1.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="landing">
+    <nav class="landing-nav">
+      <div class="nav-brand">
+        <span>🌸</span>
+        <span>MiniMood</span>
+      </div>
+      <div class="nav-links">
+        <a href="/login" class="btn btn-ghost btn-small">Login</a>
+        <a href="/register" class="btn btn-primary btn-small">Sign Up</a>
+      </div>
+    </nav>
+
+    <section class="hero">
+      <div class="hero-icon">🌸</div>
+      <h1>MiniMood</h1>
+      <p class="hero-tagline">One line, one mood, every day.</p>
+      <div class="hero-buttons">
+        <a href="/register" class="btn btn-primary">Start Your Journal</a>
+        <a href="/login" class="btn btn-secondary">I Have an Account</a>
+      </div>
+    </section>
+
+    <section class="features">
+      <h2>Why MiniMood?</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <img src="/emojis/1_Happy.png" alt="Happy">
+          </div>
+          <h3>Simple & Quick</h3>
+          <p>Just one mood and one line per day. No pressure, no overwhelm.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <img src="/emojis/19_Hopeful.png" alt="Hopeful">
+          </div>
+          <h3>Track Your Feelings</h3>
+          <p>See patterns in your emotions with beautiful calendar views.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <img src="/emojis/31_Love.png" alt="Love">
+          </div>
+          <h3>Cute & Cozy</h3>
+          <p>A delightful experience with adorable mood icons.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="mood-preview">
+      <h2>40 Adorable Moods</h2>
+      <p>Express exactly how you feel with our collection of cute mood icons</p>
+      <div class="mood-showcase">
+        <div class="mood-showcase-item">
+          <img src="/emojis/1_Happy.png" alt="Happy">
+          <span>Happy</span>
+        </div>
+        <div class="mood-showcase-item">
+          <img src="/emojis/6_Calm.png" alt="Calm">
+          <span>Calm</span>
+        </div>
+        <div class="mood-showcase-item">
+          <img src="/emojis/7_Excited.png" alt="Excited">
+          <span>Excited</span>
+        </div>
+        <div class="mood-showcase-item">
+          <img src="/emojis/20_Grateful.png" alt="Grateful">
+          <span>Grateful</span>
+        </div>
+        <div class="mood-showcase-item">
+          <img src="/emojis/17_Relaxed.png" alt="Relaxed">
+          <span>Relaxed</span>
+        </div>
+        <div class="mood-showcase-item">
+          <img src="/emojis/31_Love.png" alt="Love">
+          <span>Love</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta">
+      <h2>Start Your Mood Journey Today</h2>
+      <p>It only takes a few seconds each day to build a beautiful picture of your emotional wellbeing.</p>
+      <a href="/register" class="btn btn-primary">Create Free Account</a>
+    </section>
+
+    <footer class="footer">
+      <div class="footer-brand">
+        <span>🌸</span>
+        <span>MiniMood</span>
+      </div>
+      <p>Made with love for mindful journaling</p>
+    </footer>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script>
+    if (api.isLoggedIn()) {
+      window.location.href = '/home';
+    }
+  </script>
+</body>
+</html>
